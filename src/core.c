@@ -871,10 +871,10 @@ static int gpu_monitoring(Labels *data)
 {
 #ifdef __linux__
 	bool gpu_ok;
-	int ret_drm, ret_hwmon, ret_temp, ret_load, ret_gclk, ret_mclk;
+	int ret_drm, ret_hwmon, ret_temp, ret_load, ret_gclk, ret_mclk, ret_gpwr, ret_gvolt;
 	uint8_t i, card_number, failed_count = 0, fglrx_count = 0, nvidia_count = 0;
 	double divisor;
-	char *temp = NULL, *gclk = NULL, *mclk = NULL, *load = NULL;
+	char *temp = NULL, *gclk = NULL, *mclk = NULL, *load = NULL, *gpwr = NULL, *gvolt = NULL;
 	static bool once_error = true;
 	static char *cached_paths_drm[LASTGRAPHICS / GPUFIELDS] = { NULL };
 	static char *cached_paths_hwmon[LASTGRAPHICS / GPUFIELDS] = { NULL };
@@ -889,6 +889,8 @@ static int gpu_monitoring(Labels *data)
 		ret_load  = -1;
 		ret_gclk  = -1;
 		ret_mclk  = -1;
+		ret_gpwr  = -1;
+		ret_gvolt = -1;
 		divisor   = 1.0;
 
 		if(gpu_ok && (data->g_data->gpu_driver[i] == GPUDRV_UNKNOWN))
@@ -905,6 +907,8 @@ static int gpu_monitoring(Labels *data)
 			casprintf(&data->tab_graphics[VALUE][GPU1USAGE       + i * GPUFIELDS], false, "---");
 			casprintf(&data->tab_graphics[VALUE][GPU1CORECLOCK   + i * GPUFIELDS], false, "---");
 			casprintf(&data->tab_graphics[VALUE][GPU1MEMCLOCK    + i * GPUFIELDS], false, "---");
+			casprintf(&data->tab_graphics[VALUE][GPU1POWERAVG    + i * GPUFIELDS], false, "---");
+			casprintf(&data->tab_graphics[VALUE][GPU1VOLTAGE     + i * GPUFIELDS], false, "---");
 			continue;
 		}
 
@@ -924,10 +928,8 @@ static int gpu_monitoring(Labels *data)
 					ret_temp = fopen_to_str(&temp, "%s/temp1_input", cached_paths_hwmon[i]);
 
 				/* DRM */
-				if(cached_paths_drm[i] == NULL) {
+				if(cached_paths_drm[i] == NULL)
 					ret_drm = request_sensor_path(format("%s/drm", data->g_data->device_path[i]), &cached_paths_drm[i], RQT_GPU_DRM);
-					printf("%s", cached_paths_drm[i]);
-				}
 				if(ret_drm || (cached_paths_drm[i] == NULL) || (sscanf(cached_paths_drm[i], "/sys/bus/pci/devices/%*x:%*x:%*x.%*d/drm/card%hhu", &card_number) != 1))
 					goto skip_clocks;
 				break;
@@ -946,8 +948,10 @@ static int gpu_monitoring(Labels *data)
 					ret_load = fopen_to_str(&load, "%s", amdgpu_gpu_busy_file);
 				else if(can_access_sys_debug_dri(data))
 					ret_load = popen_to_str(&load, "awk '/GPU Load/ { print $3 }' %s/%u/amdgpu_pm_info", SYS_DEBUG_DRI, card_number);
-				ret_gclk = fopen_to_str(&gclk, "%s/freq1_input", cached_paths_hwmon[i]);
+				ret_gclk  = popen_to_str(&gclk, "awk -F: '{ print int($1 / 1000 / 1000) }' %s/freq1_input", cached_paths_hwmon[i]);
 				ret_mclk  = popen_to_str(&mclk, "awk -F '(: |Mhz)' '/\\*/ { print $2 }' %s/device/pp_dpm_mclk", cached_paths_drm[i]);
+				ret_gvolt  = popen_to_str(&gvolt, "awk -F: '{ print $1 / 1000 }' %s/in0_input", cached_paths_hwmon[i]);
+				ret_gpwr  = popen_to_str(&gpwr, "awk -F: '{ print $1 / 1000 / 1000 }' %s/power1_average", cached_paths_hwmon[i]);
 				break;
 			}
 			case GPUDRV_FGLRX:
@@ -1007,20 +1011,26 @@ static int gpu_monitoring(Labels *data)
 		if(!ret_load)
 			casprintf(&data->tab_graphics[VALUE][GPU1USAGE       + i * GPUFIELDS], false, "%s%%",  load);
 		if(!ret_gclk)
-			casprintf(&data->tab_graphics[VALUE][GPU1CORECLOCK   + i * GPUFIELDS], true, "%.f MHz", atof(gclk) / divisor / divisor);
+			casprintf(&data->tab_graphics[VALUE][GPU1CORECLOCK   + i * GPUFIELDS], true, "%s MHz", gclk);
 		if(!ret_mclk)
 			casprintf(&data->tab_graphics[VALUE][GPU1MEMCLOCK    + i * GPUFIELDS], true, "%s MHz", mclk);
+		if(!ret_gvolt)
+			casprintf(&data->tab_graphics[VALUE][GPU1VOLTAGE     + i * GPUFIELDS], true, "%.2f V", atof(gvolt));
+		if(!ret_gpwr)
+			casprintf(&data->tab_graphics[VALUE][GPU1POWERAVG    + i * GPUFIELDS], true, "%.2f W", atof(gpwr));
 skip_clocks:
 		if(!ret_temp)
 			casprintf(&data->tab_graphics[VALUE][GPU1TEMPERATURE + i * GPUFIELDS], true, "%.2f°C", atof(temp) / divisor);
 
-		if(ret_temp && ret_load && ret_gclk && ret_mclk)
+		if(ret_temp && ret_load && ret_gclk && ret_mclk && ret_gpwr && ret_gvolt)
 			failed_count++;
 
 		FREE(temp);
 		FREE(load);
 		FREE(gclk);
 		FREE(mclk);
+		FREE(gvolt);
+		FREE(gpwr);
 	}
 
 	if(once_error && failed_count)
