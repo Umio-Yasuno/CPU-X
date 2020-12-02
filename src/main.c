@@ -193,7 +193,7 @@ static void labels_setname(Labels *data)
 		{ data->tab_motherboard[NAME], data->tab_motherboard[VALUE], LASTMOTHERBOARD },
 		{ data->tab_memory[NAME],      data->tab_memory[VALUE],      LASTMEMORY      },
 		{ data->tab_system[NAME],      data->tab_system[VALUE],      LASTSYSTEM      },
-		{ data->tab_graphics[NAME],    data->tab_graphics[VALUE],    LASTGRAPHICS + 1    },
+		{ data->tab_graphics[NAME],    data->tab_graphics[VALUE],    LASTGRAPHICS    },
 		{ data->tab_bench[NAME],       data->tab_bench[VALUE],       LASTBENCH       },
 		{ NULL,                        NULL,                         0               }
 	};
