@@ -314,6 +314,7 @@ static gchar *get_id(const gchar *objectstr, gchar *type)
 	buff  = g_strconcat(split[0], "_", type, split[1], NULL);
 	g_strfreev(split);
 
+	printf("%s\n", buff);
 	return buff;
 }
 

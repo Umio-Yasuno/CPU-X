@@ -555,6 +555,14 @@ msgstr  ""
 msgid   "Memory clock"
 msgstr  ""
 
+#: main.c:151
+msgid   "GPU Core Volt"
+msgstr  ""
+
+#: main.c:152
+msgid   "Power Avg"
+msgstr  ""
+
 #: main.c:154
 msgid   "Bench"
 msgstr  ""

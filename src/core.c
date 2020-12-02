@@ -959,6 +959,8 @@ static int gpu_monitoring(Labels *data)
 				ret_load  = popen_to_str(&load, "aticonfig --adapter=%1u --odgc | awk '/GPU load/ { sub(\"%\",\"\",$4); print $4 }'", fglrx_count);
 				ret_gclk  = popen_to_str(&gclk, "aticonfig --adapter=%1u --odgc | awk '/Current Clocks/ { print $4 }'",               fglrx_count);
 				ret_mclk  = popen_to_str(&mclk, "aticonfig --adapter=%1u --odgc | awk '/Current Clocks/ { print $5 }'",               fglrx_count);
+				ret_gpwr  = -1;
+				ret_gvolt = -1;
 				fglrx_count++;
 				break;
 			case GPUDRV_INTEL:
@@ -966,6 +968,8 @@ static int gpu_monitoring(Labels *data)
 				ret_load  = -1;
 				ret_gclk  = fopen_to_str(&gclk, "%s/gt_cur_freq_mhz", cached_paths_drm[i]);
 				ret_mclk  = -1;
+				ret_gpwr  = -1;
+				ret_gvolt = -1;
 				break;
 			case GPUDRV_RADEON:
 				// ret_temp obtained above
@@ -974,6 +978,8 @@ static int gpu_monitoring(Labels *data)
 				ret_mclk  = can_access_sys_debug_dri(data) ? popen_to_str(&mclk, "awk -F '(mclk: | vddc:)' 'NR==2 { print $2 }' %s/%u/radeon_pm_info", SYS_DEBUG_DRI, card_number) : -1;
 				if((gclk != NULL) && (strlen(gclk) >= 2)) gclk[strlen(gclk) - 2] = '\0';
 				if((mclk != NULL) && (strlen(mclk) >= 2)) mclk[strlen(mclk) - 2] = '\0';
+				ret_gpwr  = -1;
+				ret_gvolt = -1;
 				break;
 			case GPUDRV_NVIDIA:
 			case GPUDRV_NVIDIA_BUMBLEBEE:
@@ -986,6 +992,8 @@ static int gpu_monitoring(Labels *data)
 				ret_load  = popen_to_str(&load, "%s --query-gpu=utilization.gpu", nvidia_cmd_args);
 				ret_gclk  = popen_to_str(&gclk, "%s --query-gpu=clocks.gr",       nvidia_cmd_args);
 				ret_mclk  = popen_to_str(&mclk, "%s --query-gpu=clocks.mem",      nvidia_cmd_args);
+				ret_gpwr  = -1;
+				ret_gvolt = -1;
 				nvidia_count++;
 				break;
 			}
@@ -999,6 +1007,8 @@ static int gpu_monitoring(Labels *data)
 				ret_load  = -1;
 				ret_gclk  = !ret_pstate && can_access_sys_debug_dri(data) ? popen_to_str(&gclk, "echo %s | grep -oP '(?<=core )[^ ]*' | cut -d- -f2", pstate) : -1;
 				ret_mclk  = !ret_pstate && can_access_sys_debug_dri(data) ? popen_to_str(&mclk, "echo %s | grep -oP '(?<=memory )[^ ]*'",             pstate) : -1;
+				ret_gpwr  = -1;
+				ret_gvolt = -1;
 				FREE(pstate);
 				break;
 			}
@@ -1022,7 +1032,7 @@ skip_clocks:
 		if(!ret_temp)
 			casprintf(&data->tab_graphics[VALUE][GPU1TEMPERATURE + i * GPUFIELDS], true, "%.2f°C", atof(temp) / divisor);
 
-		if(ret_temp && ret_load && ret_gclk && ret_mclk && ret_gpwr && ret_gvolt)
+		if(ret_temp && ret_load && ret_gclk && ret_mclk && ret_gvolt && ret_gpwr)
 			failed_count++;
 
 		FREE(temp);
