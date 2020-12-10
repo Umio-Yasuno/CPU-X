@@ -324,7 +324,7 @@ int request_sensor_path(char *base_dir, char **cached_path, enum RequestSensor w
 	   regcomp(&regex_filename_temp_lab, "temp[[:digit:]]_label",                           REG_NOSUB)             ||
 	   regcomp(&regex_filename_in_in,    "in0_input",                                       REG_NOSUB)             ||
 	   regcomp(&regex_dirname_cardN,     "card[[:digit:]]",                                 REG_NOSUB)             ||
-	   regcomp(&regex_dirname_hwmonN,	 "hwmon[[:digit:]]",                                REG_NOSUB)             ||
+	   regcomp(&regex_dirname_hwmonN,    "hwmon[[:digit:]]",                                REG_NOSUB)             ||
 	   regcomp(&regex_label_coreN,       format("Core[[:space:]]*%u", opts->selected_core), REG_NOSUB | REG_ICASE) ||
 	   regcomp(&regex_label_tdie,        "Tdie",                                            REG_NOSUB | REG_ICASE) ||
 	   regcomp(&regex_label_other,       "CPU",                                             REG_NOSUB | REG_ICASE))
