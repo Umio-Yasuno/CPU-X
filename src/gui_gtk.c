@@ -594,7 +594,7 @@ static void set_labels(GtkLabels *glab, Labels *data)
 		gtk_label_set_text(GTK_LABEL(glab->gtktab_graphics[VALUE][i]), data->tab_graphics[VALUE][i]);
 	}
 	for(i = LASTGRAPHICS / GPUFIELDS; i >= data->gpu_count; i--)
-		gtk_grid_remove_row(GTK_GRID(glab->gridcards), i);
+		gtk_grid_remove_row(GTK_GRID(glab->gridcards), i) - 1;
 	if(!data->gpu_count)
 		gtk_widget_hide(GTK_WIDGET(glab->gridcards));
 
