@@ -5574,24 +5574,6 @@
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkLabel" id="card0_labgclk">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="halign">end</property>
-                                        <property name="margin_right">4</property>
-                                        <property name="margin_end">4</property>
-                                        <property name="margin_top">1</property>
-                                        <property name="margin_bottom">1</property>
-                                        <property name="mnemonic_widget">card0_valgclk</property>
-                                        <property name="single_line_mode">True</property>
-                                        <property name="lines">1</property>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">0</property>
-                                        <property name="top_attach">3</property>
-                                      </packing>
-                                    </child>
-                                    <child>
                                       <object class="GtkBox" id="card0_box1">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
@@ -5980,6 +5962,24 @@
                                       <packing>
                                         <property name="left_attach">0</property>
                                         <property name="top_attach">4</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkLabel" id="card0_labgclk">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="halign">end</property>
+                                        <property name="margin_right">4</property>
+                                        <property name="margin_end">4</property>
+                                        <property name="margin_top">1</property>
+                                        <property name="margin_bottom">1</property>
+                                        <property name="mnemonic_widget">card0_valgclk</property>
+                                        <property name="single_line_mode">True</property>
+                                        <property name="lines">1</property>
+                                      </object>
+                                      <packing>
+                                        <property name="left_attach">0</property>
+                                        <property name="top_attach">3</property>
                                       </packing>
                                     </child>
                                   </object>
